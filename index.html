@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar Anti Maling Motor</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Orbitron',sans-serif;
+}
+
+body{
+    background:#050816;
+    overflow:hidden;
+    color:white;
+}
+
+.radar-bg{
+    position:fixed;
+    inset:0;
+    background:
+    radial-gradient(circle at center,#00ffcc22 0%,transparent 60%),
+    #050816;
+}
+
+.container{
+    position:relative;
+    z-index:2;
+    width:100%;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:20px;
+    padding:20px;
+}
+
+.title{
+    font-size:38px;
+    text-align:center;
+    color:#00ffe1;
+    text-shadow:0 0 20px #00ffe1;
+}
+
+.subtitle{
+    color:#8befff;
+    text-align:center;
+    max-width:700px;
+    line-height:1.6;
+}
+
+.radar{
+    position:relative;
+    width:320px;
+    height:320px;
+    border-radius:50%;
+    border:3px solid #00ffe1;
+    overflow:hidden;
+    box-shadow:
+    0 0 40px #00ffe1,
+    inset 0 0 30px #00ffe1;
+}
+
+.circle{
+    position:absolute;
+    border:1px solid #00ffe1;
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+.c1{ width:80px; height:80px; }
+.c2{ width:160px; height:160px; }
+.c3{ width:240px; height:240px; }
+
+.lineH, .lineV{
+    position:absolute;
+    background:#00ffe1;
+}
+
+.lineH{
+    width:100%;
+    height:1px;
+    top:50%;
+}
+
+.lineV{
+    width:1px;
+    height:100%;
+    left:50%;
+}
+
+.scan{
+    position:absolute;
+    width:50%;
+    height:4px;
+    background:#00ffe1;
+    top:50%;
+    left:50%;
+    transform-origin:left center;
+    animation:rotate 2s linear infinite;
+    box-shadow:0 0 25px #00ffe1;
+}
+
+@keyframes rotate{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.motor{
+    font-size:90px;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    filter:drop-shadow(0 0 10px #00ffe1);
+}
+
+.status{
+    font-size:22px;
+    padding:15px 30px;
+    border-radius:15px;
+    background:#07182b;
+    border:2px solid #00ffe1;
+    box-shadow:0 0 20px #00ffe1;
+    text-align:center;
+    transition:0.3s;
+}
+
+.buttons{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+button{
+    padding:15px 25px;
+    border:none;
+    border-radius:12px;
+    background:#00ffe1;
+    color:#000;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:16px;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 20px #00ffe1;
+}
+
+.alert{
+    animation:blink 0.4s infinite;
+}
+
+@keyframes blink{
+    0%{ background:#ff0000; }
+    50%{ background:#330000; }
+    100%{ background:#ff0000; }
+}
+
+.footer{
+    position:absolute;
+    bottom:15px;
+    font-size:13px;
+    color:#7abdc4;
+}
+
+.flash{
+    animation:flashScreen 0.3s infinite;
+}
+
+@keyframes flashScreen{
+    0%{ background:#050816; }
+    50%{ background:#300000; }
+    100%{ background:#050816; }
+}
+
+</style>
+</head>
+
+<body id="body">
+
+<div class="radar-bg"></div>
+
+<div class="container">
+
+    <div class="title">
+        🚨 RADAR ANTI MALING MOTOR 🚨
+    </div>
+
+    <div class="subtitle">
+        Sistem radar pendeteksi getaran motor. 
+        Saat motor digoyang atau disentuh, sirine alarm mobil otomatis berbunyi.
+    </div>
+
+    <div class="radar">
+
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
+        <div class="circle c3"></div>
+
+        <div class="lineH"></div>
+        <div class="lineV"></div>
+
+        <div class="scan"></div>
+
+        <div class="motor">🏍️</div>
+
+    </div>
+
+    <div class="status" id="status">
+        SISTEM SIAGA
+    </div>
+
+    <div class="buttons">
+        <button onclick="aktifkan()">AKTIFKAN SENSOR</button>
+        <button onclick="matikan()">MATIKAN</button>
+        <button onclick="testAlarm()">TEST ALARM</button>
+    </div>
+
+    <div class="footer">
+        © Radar Security Motor AI
+    </div>
+
+</div>
+
+<script>
+
+let aktif = false;
+
+const statusEl = document.getElementById("status");
+const bodyEl = document.getElementById("body");
+
+/* =========================
+   SUARA ALARM MOBIL
+========================= */
+
+const alarm = new Audio("https://www.soundjay.com/car/car-alarm-01.mp3");
+
+alarm.loop = true;
+alarm.volume = 1.0;
+
+/* =========================
+   AKTIFKAN SENSOR
+========================= */
+
+function aktifkan(){
+
+    aktif = true;
+
+    statusEl.innerHTML = "🟢 SENSOR AKTIF";
+    statusEl.style.color = "#00ff88";
+
+    if(window.DeviceMotionEvent){
+
+        window.addEventListener("devicemotion", gerakanHandler);
+
+    }else{
+
+        alert("Sensor gerak tidak didukung di perangkat ini.");
+
+    }
+}
+
+/* =========================
+   MATIKAN
+========================= */
+
+function matikan(){
+
+    aktif = false;
+
+    statusEl.innerHTML = "⚪ SISTEM MATI";
+    statusEl.style.color = "#ffffff";
+
+    statusEl.classList.remove("alert");
+    bodyEl.classList.remove("flash");
+
+    alarm.pause();
+    alarm.currentTime = 0;
+}
+
+/* =========================
+   TEST ALARM
+========================= */
+
+function testAlarm(){
+
+    statusEl.innerHTML = "🚨 TEST SIRINE";
+    statusEl.classList.add("alert");
+
+    bodyEl.classList.add("flash");
+
+    alarm.play();
+
+    navigator.vibrate([300,100,300,100,500]);
+
+    setTimeout(()=>{
+
+        alarm.pause();
+        alarm.currentTime = 0;
+
+        statusEl.classList.remove("alert");
+        bodyEl.classList.remove("flash");
+
+        if(aktif){
+            statusEl.innerHTML = "🟢 SENSOR AKTIF";
+        }else{
+            statusEl.innerHTML = "⚪ SISTEM MATI";
+        }
+
+    },5000);
+}
+
+/* =========================
+   DETEKSI GOYANGAN
+========================= */
+
+function gerakanHandler(event){
+
+    if(!aktif) return;
+
+    let x = event.accelerationIncludingGravity.x || 0;
+    let y = event.accelerationIncludingGravity.y || 0;
+    let z = event.accelerationIncludingGravity.z || 0;
+
+    let total = Math.abs(x)+Math.abs(y)+Math.abs(z);
+
+    if(total > 35){
+
+        statusEl.innerHTML = "🚨 MOTOR DIGOYANG!";
+        statusEl.classList.add("alert");
+
+        bodyEl.classList.add("flash");
+
+        navigator.vibrate([500,200,500,200,1000]);
+
+        alarm.play();
+    }
+}
+
+</script>
+
+</body>
+</html>
